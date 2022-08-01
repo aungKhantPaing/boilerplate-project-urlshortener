@@ -26,10 +26,21 @@ app.get("/api/hello", function (req, res) {
   res.json({ greeting: "hello API" });
 });
 
+const getUrlHost = (input) => {
+  try {
+    const url = new URL(input);
+    return url.host;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+};
+
 app.post("/api/shorturl", async (req, res) => {
-  const inputUrl = req.body.url;
-  dns.lookup(inputUrl, async (err) => {
-    if (err) {
+  const inputUrl = getUrlHost(req.body.url);
+  dns.lookup(inputUrl, async (err, address, family) => {
+    console.log({ inputUrl, err });
+    if (!inputUrl || err) {
       res.json({ error: "Invalid URL" });
     } else {
       const url = await urlModel.create({
